@@ -1,0 +1,14 @@
+services:
+  intg-tivo:
+    build: .
+    container_name: intg-tivo
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      UC_CONFIG_HOME: /config
+      UC_LOG_LEVEL: DEBUG
+    volumes:
+      - intg_tivo_config:/config
+
+volumes:
+  intg_tivo_config:

@@ -1,0 +1,40 @@
+{
+  "driver_id": "tivo_driver",
+  "version": "0.1.0",
+  "min_core_api": "0.20.0",
+  "name": {
+    "en": "TiVo DVR"
+  },
+  "icon": "custom:tivo.png",
+  "description": {
+    "en": "Integration to control TiVo DVR devices."
+  },
+  "port": 9083,
+  "developer": {
+    "name": "John J Carey",
+    "email": "hello@unfoldedcircle.com",
+    "url": "https://www.github.com/johncarey70"
+  },
+  "home_page": "https://www.github.com/johncarey70/uc-integration-tivo",
+  "setup_data_schema": {
+		"title": {
+			"en": "Integration setup"
+		},
+		"settings": [
+			{
+				"id": "info",
+				"label": {
+					"en": "Setup Process"
+				},
+				"field": {
+					"label": {
+						"value": {
+							"en": "This integration will allow you to control TiVo DVR devices on your network."
+						}
+					}
+				}
+			}
+		]
+	},
+	"release_date": "2026-05-20"
+}
