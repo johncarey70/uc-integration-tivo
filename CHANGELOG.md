@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.1
+
+### Updated Remote Entity
+
+- Changed Remote Layout
+- Fixed SETCH / FORCECH (Use IRCODE)
+
 ## v0.1.0
 
 ### Added
