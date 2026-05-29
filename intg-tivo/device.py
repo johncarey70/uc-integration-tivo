@@ -103,9 +103,13 @@ class TiVoDevice(PersistentConnectionDevice):
             return
 
         _reader, writer = self._connection
+        self._connection = None
 
         writer.close()
-        await writer.wait_closed()
+        try:
+            await asyncio.wait_for(writer.wait_closed(), timeout=2.0)
+        except TimeoutError:
+            _LOG.debug("[%s] Timed out closing TiVo TCP socket", self.log_id)
 
         _LOG.debug("[%s] TiVo TCP socket closed", self.log_id)
 

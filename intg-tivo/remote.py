@@ -36,6 +36,7 @@ class TiVoCommand(StrEnum):
     GUIDE = "IRCODE GUIDE"
     INFO = "IRCODE INFO"
     EXIT = "IRCODE EXIT"
+    BACK = "IRCODE BACK"
 
     UP = "IRCODE UP"
     DOWN = "IRCODE DOWN"
@@ -134,42 +135,25 @@ class TiVoRemote(RemoteEntity):
     def create_button_mappings(self) -> list[DeviceButtonMapping | dict[str, Any]]:
         """Create hard-button mappings for the UC remote."""
         mappings = [
-            create_btn_mapping(Buttons.DPAD_UP, TiVoCommand.UP.name),
-            create_btn_mapping(Buttons.DPAD_DOWN, TiVoCommand.DOWN.name),
-            create_btn_mapping(Buttons.DPAD_LEFT, TiVoCommand.LEFT.name),
-            create_btn_mapping(Buttons.DPAD_RIGHT, TiVoCommand.RIGHT.name),
-            create_btn_mapping(Buttons.DPAD_MIDDLE, TiVoCommand.SELECT.name),
+            create_btn_mapping(Buttons.DPAD_UP, TiVoCommand.PLAY.name),
+            create_btn_mapping(Buttons.DPAD_DOWN, TiVoCommand.SLOW.name),
+            create_btn_mapping(Buttons.DPAD_LEFT, TiVoCommand.REVERSE.name),
+            create_btn_mapping(Buttons.DPAD_RIGHT, TiVoCommand.FORWARD.name),
+            create_btn_mapping(Buttons.DPAD_MIDDLE, TiVoCommand.PAUSE.name),
+            create_btn_mapping(Buttons.BACK, TiVoCommand.BACK.name),
+            create_btn_mapping(Buttons.MENU, TiVoCommand.GUIDE.name),
+            create_btn_mapping(Buttons.CHANNEL_UP, TiVoCommand.CHANNELUP.name),
+            create_btn_mapping(Buttons.CHANNEL_DOWN, TiVoCommand.CHANNELDOWN.name),
+            create_btn_mapping(Buttons.PLAY, TiVoCommand.PLAY.name),
+            create_btn_mapping(Buttons.STOP, TiVoCommand.STOP.name),
+            create_btn_mapping(Buttons.PREV, TiVoCommand.REPLAY.name),
+            create_btn_mapping(Buttons.NEXT, TiVoCommand.ADVANCE.name),
+            create_btn_mapping(Buttons.RECORD, TiVoCommand.RECORD.name),
+            create_btn_mapping(Buttons.RED, TiVoCommand.ACTION_A.name),
+            create_btn_mapping(Buttons.GREEN, TiVoCommand.ACTION_B.name),
+            create_btn_mapping(Buttons.YELLOW, TiVoCommand.ACTION_C.name),
+            create_btn_mapping(Buttons.BLUE, TiVoCommand.ACTION_D.name),
         ]
-
-        optional_mappings = {
-            "BACK": TiVoCommand.LEFT.name,
-            "HOME": TiVoCommand.TIVO.name,
-            "MENU": TiVoCommand.TIVO.name,
-            "INFO": TiVoCommand.INFO.name,
-            "GUIDE": TiVoCommand.GUIDE.name,
-            "CHANNEL_UP": TiVoCommand.CHANNELUP.name,
-            "CHANNEL_DOWN": TiVoCommand.CHANNELDOWN.name,
-            "VOLUME_UP": TiVoCommand.VOLUMEUP.name,
-            "VOLUME_DOWN": TiVoCommand.VOLUMEDOWN.name,
-            "MUTE": TiVoCommand.MUTE.name,
-            "PLAY": TiVoCommand.PLAY.name,
-            "PAUSE": TiVoCommand.PAUSE.name,
-            "STOP": TiVoCommand.STOP.name,
-            "PREV": TiVoCommand.REPLAY.name,
-            "NEXT": TiVoCommand.ADVANCE.name,
-            "REW": TiVoCommand.REVERSE.name,
-            "FF": TiVoCommand.FORWARD.name,
-            "RECORD": TiVoCommand.RECORD.name,
-        }
-
-        for button_name, command in optional_mappings.items():
-            button = getattr(Buttons, button_name, None)
-
-            if button is None:
-                _LOG.debug("UC button enum not available: %s", button_name)
-                continue
-
-            mappings.append(create_btn_mapping(button, command))
 
         return mappings
 
@@ -177,7 +161,6 @@ class TiVoRemote(RemoteEntity):
         """Create the TiVo remote UI pages."""
         return [
             self._create_navigation_page(),
-            self._create_playback_page(),
             self._create_keypad_page(),
             self._create_shortcuts_page(),
         ]
@@ -187,70 +170,49 @@ class TiVoRemote(RemoteEntity):
         """Create the navigation UI page."""
         page = UiPage("page1", "Navigation", grid=Size(6, 6))
 
-        page.add(create_ui_text("TiVo", 0, 0, Size(2, 1), TiVoCommand.TIVO.name))
-        page.add(create_ui_icon("uc:up-arrow", 2, 0, Size(2, 1), TiVoCommand.UP.name))
-        page.add(create_ui_text("Guide", 4, 0, Size(2, 1), TiVoCommand.GUIDE.name))
+        # Top row
+        page.add(create_ui_text("TiVo", 1, 0, Size(4, 1), TiVoCommand.TIVO.name))
 
+        # Row 2
+        page.add(create_ui_text("Back", 0, 1, Size(2, 1), TiVoCommand.BACK.name))
         page.add(
-            create_ui_icon("uc:left-arrow", 0, 1, Size(2, 1), TiVoCommand.LEFT.name)
+            create_ui_icon("uc:up-arrow", 2, 1, Size(2, 1), TiVoCommand.UP.name)
         )
-        page.add(create_ui_icon("uc:circle", 2, 1, Size(2, 1), TiVoCommand.SELECT.name))
+        page.add(create_ui_text("Info", 4, 1, Size(2, 1), TiVoCommand.INFO.name))
+
+        # Row 3
         page.add(
-            create_ui_icon("uc:right-arrow", 4, 1, Size(2, 1), TiVoCommand.RIGHT.name)
+            create_ui_icon("uc:left-arrow", 0, 2, Size(2, 1), TiVoCommand.LEFT.name)
+        )
+        page.add(
+            create_ui_icon("uc:circle", 2, 2, Size(2, 1), TiVoCommand.SELECT.name)
+        )
+        page.add(
+            create_ui_icon("uc:right-arrow", 4, 2, Size(2, 1), TiVoCommand.RIGHT.name)
         )
 
-        page.add(create_ui_text("Exit", 0, 2, Size(2, 1), TiVoCommand.EXIT.name))
+        # Row 4
+        page.add(create_ui_text("Clear", 0, 3, Size(2, 1), TiVoCommand.CLEAR.name))
         page.add(
-            create_ui_icon("uc:down-arrow", 2, 2, Size(2, 1), TiVoCommand.DOWN.name)
+            create_ui_icon("uc:down-arrow", 2, 3, Size(2, 1), TiVoCommand.DOWN.name)
         )
-        page.add(create_ui_text("Info", 4, 2, Size(2, 1), TiVoCommand.INFO.name))
+        page.add(create_ui_text("Exit", 4, 3, Size(2, 1), TiVoCommand.EXIT.name))
 
-        page.add(create_ui_text("Live TV", 0, 3, Size(3, 1), TiVoCommand.LIVETV.name))
+        # Row 5
+        page.add(create_ui_text("Live TV", 0, 4, Size(3, 1), TiVoCommand.LIVETV.name))
         page.add(
             create_ui_text(
                 "Now Playing",
                 3,
-                3,
+                4,
                 Size(3, 1),
                 TiVoCommand.TELEPORT_NOWPLAYING.name,
             )
         )
 
-        page.add(create_ui_text("Ch +", 0, 4, Size(3, 1), TiVoCommand.CHANNELUP.name))
-        page.add(create_ui_text("Ch -", 3, 4, Size(3, 1), TiVoCommand.CHANNELDOWN.name))
-
-        page.add(create_ui_text("Vol +", 0, 5, Size(2, 1), TiVoCommand.VOLUMEUP.name))
-        page.add(create_ui_text("Mute", 2, 5, Size(2, 1), TiVoCommand.MUTE.name))
-        page.add(create_ui_text("Vol -", 4, 5, Size(2, 1), TiVoCommand.VOLUMEDOWN.name))
-
-        return page
-
-    @staticmethod
-    def _create_playback_page() -> UiPage:
-        """Create the playback UI page."""
-        page = UiPage("page2", "Playback", grid=Size(6, 5))
-
-        page.add(create_ui_text("Replay", 0, 0, Size(2, 1), TiVoCommand.REPLAY.name))
-        page.add(create_ui_text("Play", 2, 0, Size(2, 1), TiVoCommand.PLAY.name))
-        page.add(create_ui_text("Advance", 4, 0, Size(2, 1), TiVoCommand.ADVANCE.name))
-
-        page.add(create_ui_text("Reverse", 0, 1, Size(2, 1), TiVoCommand.REVERSE.name))
-        page.add(create_ui_text("Pause", 2, 1, Size(2, 1), TiVoCommand.PAUSE.name))
-        page.add(create_ui_text("Forward", 4, 1, Size(2, 1), TiVoCommand.FORWARD.name))
-
-        page.add(create_ui_text("Slow", 0, 2, Size(2, 1), TiVoCommand.SLOW.name))
-        page.add(create_ui_text("Stop", 2, 2, Size(2, 1), TiVoCommand.STOP.name))
-        page.add(create_ui_text("Record", 4, 2, Size(2, 1), TiVoCommand.RECORD.name))
-
-        page.add(
-            create_ui_text("Thumbs +", 0, 3, Size(3, 1), TiVoCommand.THUMBSUP.name)
-        )
-        page.add(
-            create_ui_text("Thumbs -", 3, 3, Size(3, 1), TiVoCommand.THUMBSDOWN.name)
-        )
-
-        page.add(create_ui_text("Options", 0, 4, Size(3, 1), TiVoCommand.OPTIONS.name))
-        page.add(create_ui_text("TV Input", 3, 4, Size(3, 1), TiVoCommand.TVINPUT.name))
+        # Row 6
+        page.add(create_ui_icon("uc:thumbs-up", 0, 5, Size(3, 1), TiVoCommand.THUMBSUP.name))
+        page.add(create_ui_icon("uc:thumbs-down", 3, 5, Size(3, 1), TiVoCommand.THUMBSDOWN.name))
 
         return page
 
@@ -321,7 +283,7 @@ class TiVoRemote(RemoteEntity):
         page.add(create_ui_text("C", 2, 2, Size(1, 1), TiVoCommand.ACTION_C.name))
         page.add(create_ui_text("D", 3, 2, Size(1, 1), TiVoCommand.ACTION_D.name))
 
-        page.add(create_ui_text("Options", 0, 3, Size(2, 1), TiVoCommand.OPTIONS.name))
+        page.add(create_ui_text("OK", 0, 3, Size(2, 1), TiVoCommand.ENTER.name))
         page.add(create_ui_text("Exit", 2, 3, Size(2, 1), TiVoCommand.EXIT.name))
 
         return page
@@ -363,15 +325,80 @@ class TiVoRemote(RemoteEntity):
 
         sequence = params.get("sequence")
         delay = int(params.get("delay", 100))
+        repeat = int(params.get("repeat", 1))
+
+        commands = self._normalize_sequence(sequence)
+
+        if not commands:
+            raise ValueError("Command sequence cannot be empty")
+
+        for _ in range(max(repeat, 1)):
+            for command in commands:
+                await self._send_tivo_command(command)
+
+                if delay > 0:
+                    await asyncio.sleep(delay / 1000)
+
+    @classmethod
+    def _normalize_sequence(cls, sequence: Any) -> list[str]:
+        """Normalize a UC command sequence into TiVo command strings."""
+        if isinstance(sequence, str):
+            return [
+                line.strip()
+                for line in sequence.replace(",", "\n").splitlines()
+                if line.strip()
+            ]
 
         if not isinstance(sequence, list):
             raise ValueError("Missing or invalid command sequence")
 
-        for command in sequence:
-            await self._send_tivo_command(str(command))
+        raw_commands: list[str] = []
 
-            if delay > 0:
-                await asyncio.sleep(delay / 1000)
+        for item in sequence:
+            if isinstance(item, str):
+                raw_commands.append(item.strip())
+                continue
+
+            if isinstance(item, dict):
+                cmd_id = item.get("cmd_id") or item.get("command")
+                item_params = item.get("params")
+
+                if cmd_id in (remote.Commands.SEND_CMD, "send_cmd") and item_params:
+                    raw_commands.append(cls._get_send_command(item_params).strip())
+                elif cmd_id:
+                    raw_commands.append(str(cmd_id).strip())
+                else:
+                    raise ValueError(f"Invalid command sequence item: {item}")
+
+                continue
+
+            raise ValueError(f"Invalid command sequence item: {item}")
+
+        return cls._combine_tivo_parameter_commands(raw_commands)
+
+    @staticmethod
+    def _combine_tivo_parameter_commands(commands: list[str]) -> list[str]:
+        """Combine TiVo commands that UC may split into command + parameter."""
+        combined: list[str] = []
+        index = 0
+
+        while index < len(commands):
+            command = commands[index].strip()
+            command_upper = command.upper()
+
+            if command_upper in {"SETCH", "FORCECH", "TELEPORT"}:
+                if index + 1 >= len(commands):
+                    raise ValueError(f"Missing parameter for {command_upper}")
+
+                parameter = commands[index + 1].strip()
+                combined.append(f"{command_upper} {parameter}")
+                index += 2
+                continue
+
+            combined.append(command)
+            index += 1
+
+        return combined
 
     async def _send_tivo_command(self, command: str) -> None:
         """Map and send a TiVo command."""
@@ -380,8 +407,30 @@ class TiVoRemote(RemoteEntity):
         if command.startswith("remote."):
             command = command.split(".", maxsplit=1)[1]
 
+        command_upper = command.upper()
+
+        if command_upper.startswith(("SETCH ", "FORCECH ")):
+            parts = command_upper.split()
+
+            if len(parts) < 2:
+                raise ValueError(f"Missing channel for {parts[0]}")
+
+            await self._send_channel_digits(parts[1])
+            return
+
         mapped_command = self._map_command(command)
         await self._device.send_command(mapped_command)
+
+    async def _send_channel_digits(self, channel: str) -> None:
+        """Tune by sending numeric IRCODEs followed by ENTER."""
+        for digit in channel:
+            if not digit.isdigit():
+                raise ValueError(f"Invalid channel digit: {digit}")
+
+            await self._device.send_command(f"IRCODE NUM{digit}")
+            await asyncio.sleep(0.1)
+
+        await self._device.send_command("IRCODE ENTER")
 
     @staticmethod
     def _map_command(command: str) -> str:
